@@ -1,0 +1,76 @@
+
+/////
+///// Intro:
+/////
+In this repository you can find "dirty" port of driver for TL-WN722N v2.0 (Ralink) to work on 4.9.0 kernel.
+Why I said "dirty"? Because I have done couple copy pastes to just make it working. It throws warnings during compilation, copy paste is repated in couple places etc.
+But I need working driver asap, not preety code ;) So if you want then you can compare it with orginal driver and clean-up.
+You can find orginal source code in rtl8188eu.tar.gz or you can just download it from vendor site.
+
+/////
+///// Tested on:
+/////
+
+# uname -a
+Linux kali 4.9.0-kali3-amd64 #1 SMP Debian 4.9.18-1kali1 (2017-04-04) x86_64 GNU/Linux
+
+/////
+///// Compile:
+/////
+
+make
+make install
+insmod /lib/modules/4.9.0-kali3-amd64/kernel/drivers/net/wireless/8188eu.ko
+
+/////
+///// Setup AP: 
+/////
+
+-------------------------------------------------
+# cat /etc/hostapd.conf 
+# Define interface
+interface=wlan0
+# Select driver
+driver=nl80211
+# Set access point name
+ssid=NETWORK_PC
+# Set access point harware mode to 802.11g
+#hw_mode=g
+# Set WIFI channel (can be easily changed)
+channel=7
+# Enable WPA2 only (1 for WPA, 2 for WPA2, 3 for WPA + WPA2)
+wpa=2
+wpa_passphrase=PlaceHereSomeSecurePass
+-------------------------------------------------
+# cat /etc/NetworkManager/NetworkManager.conf 
+[main]
+plugins=ifupdown,keyfile
+
+[ifupdown]
+managed=false
+
+[keyfile]
+unmanaged-devices=mac:xx:xx:xx:xx:xx:xx
+-------------------------------------------------
+# cat wifi.sh
+#!/bin/bash
+# Start
+rfkill unblock all
+ifconfig wlan0 up
+# Configure IP address for WLAN
+ifconfig wlan0 192.168.150.1
+
+# Enable routing
+sysctl net.ipv4.ip_forward=1
+# Enable NAT
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+# Run access point daemon
+sudo hostapd /etc/hostapd.conf
+-------------------------------------------------
+# ./wifi.sh
+net.ipv4.ip_forward = 1
+Configuration file: /etc/hostapd.conf
+wlan0: Could not connect to kernel driver
+Using interface wlan0 with hwaddr xx:xx:xx:xx:xx:xx and ssid "NETWORK_PC"
+wlan0: interface state UNINITIALIZED->ENABLED
+wlan0: AP-ENABLED 

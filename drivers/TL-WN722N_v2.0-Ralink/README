@@ -4,8 +4,17 @@
 /////
 In this repository you can find "dirty" port of driver for TL-WN722N v2.0 (Ralink) to work on 4.9.0 kernel.
 Why I said "dirty"? Because I have done couple copy pastes to just make it working. It throws warnings during compilation, copy paste is repated in couple places etc.
-But I need working driver asap, not preety code ;) So if you want then you can compare it with orginal driver and clean-up.
+But I needed working driver asap, not preety code ;) So if you want then you can compare it with orginal driver and clean-up.
 You can find orginal source code in rtl8188eu.tar.gz or you can just download it from vendor site.
+
+/////
+///// Source -> Kernel version
+/////
+Version		Status		Directory
+Kernel 4.9	 Works		rtl8188EUS_linux_v4.3.0.8_13968.20150417
+Kernel 4.4.73	 Compiles (let me know if it works for you)	rtl8188EUS_linux_v4.3.0.8_13968.20150417-target-kernel_4.4
+
+
 
 /////
 ///// Tested on:

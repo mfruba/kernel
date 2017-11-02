@@ -867,6 +867,20 @@ check_bss:
 		#endif
 
 		DBG_871X(FUNC_ADPT_FMT" call cfg80211_roamed\n", FUNC_ADPT_ARG(padapter));
+                #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 13, 0)
+                struct cfg80211_roam_info roaminfo = {
+                        .channel = notify_channel,
+                        .bssid = cur_network->network.MacAddress,
+                        .req_ie = pmlmepriv->assoc_req+sizeof(struct rtw_ieee80211_hdr_3addr)+2,
+                        .req_ie_len = pmlmepriv->assoc_req_len-sizeof(struct rtw_ieee80211_hdr_3addr)-2,
+                        .resp_ie = pmlmepriv->assoc_rsp+sizeof(struct rtw_ieee80211_hdr_3addr)+6,
+                        .resp_ie_len = pmlmepriv->assoc_rsp_len-sizeof(struct rtw_ieee80211_hdr_3addr)-6,
+                        .authorized = 1,
+                };
+		cfg80211_roamed(padapter->pnetdev
+			, &roaminfo
+			, GFP_ATOMIC);
+                #else
 		cfg80211_roamed(padapter->pnetdev
 			#if LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 39) || defined(COMPAT_KERNEL_RELEASE)
 			, notify_channel
@@ -877,6 +891,7 @@ check_bss:
 			, pmlmepriv->assoc_rsp+sizeof(struct rtw_ieee80211_hdr_3addr)+6
 			, pmlmepriv->assoc_rsp_len-sizeof(struct rtw_ieee80211_hdr_3addr)-6
 			, GFP_ATOMIC);
+                #endif
 	}
 	else
 	{
@@ -1856,7 +1871,10 @@ enum nl80211_iftype {
 */
 static int cfg80211_rtw_change_iface(struct wiphy *wiphy,
 				     struct net_device *ndev,
-				     enum nl80211_iftype type, u32 *flags,
+				     enum nl80211_iftype type, 
+                                     #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 13, 0)
+                                     u32 *flags,
+                                     #endif
 				     struct vif_params *params)
 {
 	enum nl80211_iftype old_type;
@@ -3936,7 +3954,11 @@ static int
 		char *name,
 	#endif
 		unsigned char name_assign_type,
-		enum nl80211_iftype type, u32 *flags, struct vif_params *params)
+		enum nl80211_iftype type, 
+                #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 13, 0)
+                u32 *flags, 
+                #endif
+                struct vif_params *params)
 {
 	int ret = 0;
 	struct net_device* ndev = NULL;
